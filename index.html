@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i人治愈小站</title>
+    <style>
+        /* 全局样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #f4e1e6);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #555;
+        }
+
+        /* 容器 */
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 标题 */
+        h1 {
+            font-size: 24px;
+            color: #7a9db5;
+            margin-bottom: 20px;
+            font-weight: normal;
+        }
+
+        /* 云朵 */
+        .cloud {
+            position: absolute;
+            width: 100px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50px;
+            z-index: 1;
+            opacity: 0;
+        }
+
+        /* 呼吸圆圈 */
+        .breathe-circle {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #89cfff, #a3d5ff);
+            border-radius: 50%;
+            margin: 20px auto;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s ease-in-out, background 4s ease-in-out;
+        }
+
+        .breathe-circle.animate {
+            animation: breathe 8s infinite ease-in-out, colorBreathe 8s infinite ease-in-out;
+        }
+
+        /* 呼吸缩放动画 - 调整为11秒完整周期 */
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.8); opacity: 0.7; }
+            36% { transform: scale(1.2); opacity: 1; } /* 4秒吸气结束点 */
+            64% { transform: scale(1.2); opacity: 1; } /* 3秒屏住结束点 */
+        }
+
+        /* 云朵浮动动画 */
+        @keyframes float {
+            0% { 
+                transform: translateX(-100px); 
+                opacity: 0;
+            }
+            10% { 
+                opacity: 0.5;
+            }
+            20% { 
+                opacity: 1;
+            }
+            100% { 
+                transform: translateX(100vw); 
+                opacity: 1;
+            }
+        }
+
+        /* 呼吸节奏提示 */
+        .breathe-text {
+            font-size: 18px;
+            color: #8a9db6;
+            margin-top: 15px;
+            transition: opacity 0.5s;
+            height: 30px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        
+        /* 倒计时提示 */
+        .countdown {
+            font-size: 28px;
+            font-weight: 500;
+            color: #5ba3e0;
+            display: inline-block;
+            min-width: 30px;
+            margin-left: 8px;
+            transition: color 0.3s, transform 0.3s;
+        }
+        
+        .countdown.inhale {
+            color: #5bc0de;
+        }
+        
+        .countdown.hold {
+            color: #d4a5ff;
+        }
+        
+        .countdown.exhale {
+            color: #5ba3e0;
+        }
+        
+        /* 完成标记 */
+        .complete-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #20c997;
+            opacity: 0;
+            transition: all 0.5s;
+            font-size: 24px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: rgba(32, 201, 151, 0.1);
+            margin-left: 8px;
+            transform: scale(0);
+        }
+        
+        .complete-mark.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        /* 呼吸进度条容器 */
+        .breathe-progress-container {
+            width: 260px;
+            height: 6px;
+            background-color: rgba(233, 236, 239, 0.5);
+            border-radius: 20px;
+            margin: 20px auto;
+            overflow: visible;
+            display: none;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 呼吸进度条 */
+        .breathe-progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #5bc0de, #d4a5ff, #5ba3e0);
+            background-size: 200% 100%;
+            border-radius: 20px;
+            transition: width 0.1s linear, opacity 0.5s ease;
+            position: relative;
+            animation: progressShift 11s infinite ease;
+        }
+        
+        @keyframes progressShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .breathe-progress-bar::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translate(50%, -50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 0 10px rgba(91, 163, 224, 0.7);
+        }
+        
+        .breathe-progress-bar.resetting {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        /* 阶段分隔线 */
+        .phase-divider {
+            position: absolute;
+            top: -7px;
+            height: 20px;
+            width: 2px;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: 2;
+            border-radius: 1px;
+        }
+        
+        /* 阶段标记点 */
+        .phase-marker {
+            position: absolute;
+            top: -4px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: white;
+            z-index: 3;
+            transform: translateX(-50%);
+            box-shadow: 0 0 8px rgba(91, 163, 224, 0.5);
+            opacity: 0.8;
+        }
+        
+        /* 呼吸阶段指示器 */
+        .breathe-stages {
+            display: flex;
+            justify-content: space-between;
+            width: 260px;
+            margin: 10px auto;
+            font-size: 13px;
+            color: #8a9db6;
+            display: none;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+        }
+        
+        /* 阶段分隔线 */
+        .phase-divider {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 2;
+        }
+        
+        /* 呼吸阶段指示器 */
+        .breathe-stages {
+            display: flex;
+            justify-content: space-between;
+            width: 200px;
+            margin: 5px auto;
+            font-size: 12px;
+            color: #7a9db5;
+            display: none;
+        }
+
+        /* 按钮 */
+        .btn {
+            background: #d1e8e4;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #555;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #b8d8d2;
+        }
+
+        /* 消息提示框 */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            display: none;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        .message-box button {
+            margin-top: 15px;
+            padding: 5px 15px;
+            border: none;
+            background: #d1e8e4;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 动态背景云朵 -->
+    <div class="cloud" id="cloud1"></div>
+    <div class="cloud" id="cloud2"></div>
+    <div class="cloud" id="cloud3"></div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <h1>这里是你的小角落</h1>
+        <p>停下来，深呼吸，感受片刻安宁。</p>
+        
+        <!-- 呼吸练习模块 -->
+        <div class="breathe-circle" id="breatheCircle"></div>
+        <p class="breathe-text" id="breatheText">
+            点击圆圈，跟随节奏呼吸 
+            <span class="countdown" id="countdown"></span>
+            <span class="complete-mark" id="completeMark">✓</span>
+        </p>
+        
+        <!-- 呼吸进度指示器 -->
+        <div class="breathe-progress-container" id="breatheProgressContainer">
+            <div class="breathe-progress-bar" id="breatheProgressBar"></div>
+            <!-- 阶段分隔线将通过JS动态添加 -->
+        </div>
+        <div class="breathe-stages" id="breatheStages">
+            <span>吸气 (4秒)</span>
+            <span>屏住 (3秒)</span>
+            <span>呼气 (4秒)</span>
+        </div>
+
+        <!-- 按钮 -->
+        <button class="btn" id="dailyMessageBtn">每日一言</button>
+    </div>
+
+    <!-- 消息提示框 -->
+    <div class="message-box" id="messageBox">
+        <p id="messageText"></p>
+        <button id="closeMessageBtn">关闭</button>
+    </div>
+
+    <script>
+        // DOM元素引用
+        const cloud1 = document.getElementById('cloud1');
+        const cloud2 = document.getElementById('cloud2');
+        const cloud3 = document.getElementById('cloud3');
+        const breatheCircle = document.getElementById('breatheCircle');
+        const breatheText = document.getElementById('breatheText');
+        const countdown = document.getElementById('countdown');
+        const completeMark = document.getElementById('completeMark');
+        const breatheProgressContainer = document.getElementById('breatheProgressContainer');
+        const breatheProgressBar = document.getElementById('breatheProgressBar');
+        const breatheStages = document.getElementById('breatheStages');
+        const dailyMessageBtn = document.getElementById('dailyMessageBtn');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const closeMessageBtn = document.getElementById('closeMessageBtn');
+
+        // 初始化云朵
+        function initClouds() {
+            const clouds = [cloud1, cloud2, cloud3];
+            clouds.forEach(cloud => {
+                const randomTop = Math.random() * 80 + 10; // 10% - 90% 垂直范围
+                const randomDuration = Math.random() * 10 + 20; // 20s - 30s 随机动画时长
+                const randomDelay = Math.random() * 5; // 0-5s 随机延迟
+
+                cloud.style.top = `${randomTop}%`;
+                cloud.style.left = '-100px';
+                cloud.style.animation = `float ${randomDuration}s ${randomDelay}s infinite linear`;
+            });
+        }
+
+        // 呼吸节奏功能
+        let breathingInterval;
+        let isBreathing = false;
+
+        function toggleBreathing() {
+            if (isBreathing) {
+                stopBreathing();
+            } else {
+                startBreathing();
+            }
+        }
+
+        function startBreathing() {
+            isBreathing = true;
+            breatheCircle.classList.add('animate');
+            
+            // 显示进度条和阶段指示器
+            breatheProgressContainer.style.display = 'block';
+            breatheStages.style.display = 'flex';
+            
+            // 设置各阶段时长（单位：毫秒）
+            const inhaleTime = 4000;  // 吸气4秒
+            const holdTime = 3000;    // 屏住3秒
+            const exhaleTime = 4000;  // 呼气4秒
+            const pauseTime = 3000;   // 完成后暂停3秒
+            
+            // 计算总周期时长
+            const totalCycleTime = inhaleTime + holdTime + exhaleTime + pauseTime;
+            
+            // 添加阶段分隔线
+            breatheProgressContainer.innerHTML = '<div class="breathe-progress-bar" id="breatheProgressBar"></div>';
+            
+            // 添加第一个分隔线（吸气/屏住的分隔）
+            const divider1 = document.createElement('div');
+            divider1.className = 'phase-divider';
+            divider1.style.left = `${(inhaleTime / (totalCycleTime - pauseTime)) * 100}%`;
+            breatheProgressContainer.appendChild(divider1);
+            
+            // 添加第二个分隔线（屏住/呼气的分隔）
+            const divider2 = document.createElement('div');
+            divider2.className = 'phase-divider';
+            divider2.style.left = `${((inhaleTime + holdTime) / (totalCycleTime - pauseTime)) * 100}%`;
+            breatheProgressContainer.appendChild(divider2);
+            
+            // 重新获取进度条引用（因为我们重建了进度条）
+            const breatheProgressBar = document.getElementById('breatheProgressBar');
+            
+            // 初始阶段和文本
+            let phase = 0;
+            const phases = ['吸气', '屏住', '呼气', '完成'];
+            const phaseTimes = [inhaleTime, holdTime, exhaleTime, pauseTime];
+            breatheText.textContent = phases[phase];
+            
+            // 清除旧的计时器
+            if (breathingInterval) clearInterval(breathingInterval);
+            
+            // 设置主计时器
+            let startTime = Date.now();
+            let isResetting = false;
+            let isPaused = false;
+            let remainingTime = 0;
+            
+            // 更新倒计时函数
+            function updateCountdown(timeRemaining) {
+                if (timeRemaining > 0) {
+                    countdown.textContent = Math.ceil(timeRemaining / 1000);
+                    completeMark.classList.remove('show');
+                } else {
+                    countdown.textContent = '';
+                    completeMark.classList.add('show');
+                }
+            }
+            
+            breathingInterval = setInterval(() => {
+                const currentTime = Date.now();
+                const elapsedTime = currentTime - startTime;
+                let cycleTime = elapsedTime % totalCycleTime;
+                
+                // 确定当前阶段
+                let currentPhase = 0;
+                let phaseStartTime = 0;
+                let currentPhaseTime = inhaleTime;
+                let timeInCurrentPhase = 0;
+                
+                if (cycleTime < inhaleTime) {
+                    // 吸气阶段
+                    currentPhase = 0;
+                    phaseStartTime = 0;
+                    currentPhaseTime = inhaleTime;
+                    timeInCurrentPhase = cycleTime;
+                    isPaused = false;
+                } else if (cycleTime < inhaleTime + holdTime) {
+                    // 屏住阶段
+                    currentPhase = 1;
+                    phaseStartTime = inhaleTime;
+                    currentPhaseTime = holdTime;
+                    timeInCurrentPhase = cycleTime - inhaleTime;
+                    isPaused = false;
+                } else if (cycleTime < inhaleTime + holdTime + exhaleTime) {
+                    // 呼气阶段
+                    currentPhase = 2;
+                    phaseStartTime = inhaleTime + holdTime;
+                    currentPhaseTime = exhaleTime;
+                    timeInCurrentPhase = cycleTime - inhaleTime - holdTime;
+                    isPaused = false;
+                } else {
+                    // 暂停阶段 - 展示完成标记
+                    currentPhase = 3;
+                    isPaused = true;
+                    
+                    // 修改进度条显示
+                    if (!isResetting) {
+                        isResetting = true;
+                        
+                        // 添加淡出效果
+                        breatheProgressBar.classList.add('resetting');
+                        
+                        // 显示完成标记
+                        countdown.textContent = '';
+                        completeMark.classList.add('show');
+                        
+                        // 等待淡出效果完成后重置进度条位置
+                        setTimeout(() => {
+                            // 重置进度条位置
+                            breatheProgressBar.style.width = '0';
+                            
+                            // 移除淡出效果类
+                            breatheProgressBar.classList.remove('resetting');
+                            
+                            // 等待pauseTime结束后恢复
+                            setTimeout(() => {
+                                isResetting = false;
+                                completeMark.classList.remove('show');
+                            }, pauseTime - 300);
+                        }, 300);
+                    }
+                }
+                
+                // 如果阶段变化，更新文本
+                if (currentPhase !== phase) {
+                    phase = currentPhase;
+                    
+                    if (phase < 3) {  // 不显示"完成"文字
+                        breatheText.textContent = phases[phase] + " ";
+                    }
+                    
+                    // 更新阶段高亮
+                    updateStageHighlight(phase);
+                }
+                
+                // 更新倒计时
+                if (!isPaused && phase < 3) {
+                    remainingTime = currentPhaseTime - timeInCurrentPhase;
+                    updateCountdown(remainingTime);
+                }
+                
+                // 计算活动周期的进度百分比 (0-100)，不包括暂停时间
+                if (!isPaused) {
+                    const activeTime = inhaleTime + holdTime + exhaleTime;
+                    const activeProgress = (Math.min(cycleTime, activeTime) / activeTime) * 100;
+                    
+                    // 更新进度条
+                    if (!isResetting) {
+                        breatheProgressBar.style.width = `${activeProgress}%`;
+                    }
+                }
+                
+            }, 20); // 高频率更新进度条，使动画更流畅
+        }
+        
+        function updateStageHighlight(currentPhase) {
+            // 高亮当前阶段
+            const stageElements = breatheStages.querySelectorAll('span');
+            stageElements.forEach((el, i) => {
+                if (i === currentPhase) {
+                    el.style.fontWeight = 'bold';
+                    el.style.color = '#5ba3e0';
+                } else {
+                    el.style.fontWeight = 'normal';
+                    el.style.color = '#7a9db5';
+                }
+            });
+        }
+
+        function stopBreathing() {
+            isBreathing = false;
+            breatheCircle.classList.remove('animate');
+            clearInterval(breathingInterval);
+            breatheText.textContent = "点击圆圈，跟随节奏呼吸";
+            
+            // 隐藏进度条和阶段指示器
+            breatheProgressContainer.style.display = 'none';
+            breatheStages.style.display = 'none';
+            
+            // 重置进度条
+            if (breatheProgressBar) {
+                breatheProgressBar.style.width = '0%';
+            }
+        }
+
+        // 每日一言功能
+        const messages = [
+            "你已经很棒了，慢慢来就好。",
+            "今天也可以是温柔的一天。",
+            "世界很大，但你有自己的小宇宙。",
+            "给自己一些空间，去感受、去成长。",
+            "记住照顾好自己，也是一种责任。"
+        ];
+
+        function showMessage() {
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            messageText.textContent = randomMsg;
+            messageBox.style.display = 'block';
+        }
+
+        function closeMessage() {
+            messageBox.style.display = 'none';
+        }
+
+        // 事件监听
+        breatheCircle.addEventListener('click', toggleBreathing);
+        dailyMessageBtn.addEventListener('click', showMessage);
+        closeMessageBtn.addEventListener('click', closeMessage);
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', initClouds);
+    </script>
+</body>
+</html>
