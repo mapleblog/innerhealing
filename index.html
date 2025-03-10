@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深呼吸 · 放松 · 治愈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0e6ff 0%, #e6eeff 50%, #e0f0ff 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background 2s;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .breathing-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        h1 {
+            font-weight: 300;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            color: #444;
+        }
+        
+        .subtitle {
+            font-weight: 300;
+            margin-bottom: 40px;
+            color: #666;
+        }
+        
+        .breath-circle {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.8);
+            margin: 0 auto 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 5px 25px rgba(150, 180, 255, 0.2), 0 0 40px rgba(150, 180, 255, 0.15);
+            transition: transform 4s ease-in-out, box-shadow 4s ease-in-out;
+            overflow: hidden;
+        }
+        
+        .breath-circle:before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(
+                circle at center,
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(230, 240, 255, 0.5) 60%,
+                rgba(210, 230, 255, 0) 70%
+            );
+            opacity: 0.4;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .circle-inner {
+            width: 60%;
+            height: 60%;
+            border-radius: 50%;
+            background-color: #e8f4f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(150, 180, 255, 0.25);
+            transition: transform 4s ease-in-out, background-color 4s ease-in-out;
+            position: relative;
+            z-index: 2;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(150, 180, 255, 0.5); }
+            70% { box-shadow: 0 0 0 20px rgba(150, 180, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(150, 180, 255, 0); }
+        }
+        
+        .instruction {
+            font-size: 24px;
+            font-weight: 300;
+            color: #444;
+            transition: opacity 0.5s;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background-color: #fff;
+            border: 1px solid #d8e0ff;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #555;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(150, 180, 255, 0.1);
+        }
+        
+        button:hover {
+            background-color: #f0f5ff;
+        }
+        
+        button.active {
+            background-color: #e0eaff;
+            color: #333;
+            border-color: #c8d8ff;
+        }
+        
+
+        
+        .timer {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #888;
+            font-weight: 300;
+        }
+        
+        footer {
+            margin-top: 40px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            padding: 0 20px 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .breath-circle {
+                width: 220px;
+                height: 220px;
+                margin-bottom: 30px;
+            }
+            
+            .instruction {
+                font-size: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 200px;
+                margin-bottom: 10px;
+            }
+            
+            .timer {
+                margin-top: 15px;
+                margin-bottom: 10px;
+            }
+            
+            footer {
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>深呼吸 · 放松 · 治愈</h1>
+        <p class="subtitle">放慢脚步，感受呼吸，净化心灵</p>
+        
+        <div class="breath-circle">
+            <div class="circle-inner">
+                <span class="instruction">准备</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="start-btn">开始</button>
+            <button id="pause-btn">暂停</button>
+            <button id="reset-btn">重置</button>
+        </div>
+        
+
+        
+        <div class="timer">00:00</div>
+    </div>
+    
+    <footer>
+        设计：简约时尚风格 · 深呼吸放松治愈小站 · 2025
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const breathCircle = document.querySelector('.breath-circle');
+            const circleInner = document.querySelector('.circle-inner');
+            const instruction = document.querySelector('.instruction');
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+
+            const timerEl = document.querySelector('.timer');
+            
+            let isBreathing = false;
+            let currentPhase = 0;
+            let interval;
+            let startTime = null;
+            let elapsedTime = 0;
+            let timerInterval;
+            
+            // 呼吸配置
+            const breathingPhases = [
+                { name: '吸气', duration: 4000, color: '#e8f2fa', scale: 1.15, bgColor: 'linear-gradient(135deg, #f0e0ff 0%, #e0e8ff 50%, #d8ecff 100%)', boxShadow: '0 5px 35px rgba(150, 180, 255, 0.4), 0 0 50px rgba(150, 180, 255, 0.3)' },
+                { name: '屏息', duration: 4000, color: '#e0eefa', scale: 1.15, bgColor: 'linear-gradient(135deg, #efe4ff 0%, #e4ecff 50%, #dcefff 100%)', boxShadow: '0 5px 35px rgba(150, 180, 255, 0.35), 0 0 50px rgba(150, 180, 255, 0.25)' },
+                { name: '呼气', duration: 4000, color: '#d8eafa', scale: 1, bgColor: 'linear-gradient(135deg, #f4ebff 0%, #eaf1ff 50%, #e6f5ff 100%)', boxShadow: '0 5px 25px rgba(150, 180, 255, 0.25), 0 0 40px rgba(150, 180, 255, 0.2)' },
+                { name: '屏息', duration: 4000, color: '#e0eefa', scale: 1, bgColor: 'linear-gradient(135deg, #efe4ff 0%, #e4ecff 50%, #dcefff 100%)', boxShadow: '0 5px 25px rgba(150, 180, 255, 0.2), 0 0 40px rgba(150, 180, 255, 0.15)' }
+            ];
+            
+            // 定时器函数
+            function updateTimer() {
+                if (!startTime) return;
+                
+                const currentTime = Date.now();
+                const totalSeconds = Math.floor((currentTime - startTime + elapsedTime) / 1000);
+                const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+                const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+                
+                timerEl.textContent = `${minutes}:${seconds}`;
+            }
+            
+            // 开始呼吸引导
+            function startBreathing() {
+                if (isBreathing) return;
+                
+                isBreathing = true;
+                startBtn.disabled = true;
+                
+                if (!startTime) {
+                    startTime = Date.now();
+                    timerInterval = setInterval(updateTimer, 1000);
+                }
+                
+                breathePhase();
+            }
+            
+            // 呼吸阶段
+            function breathePhase() {
+                if (!isBreathing) return;
+                
+                const phase = breathingPhases[currentPhase];
+                
+                // 更新指示和动画
+                instruction.textContent = phase.name;
+                circleInner.style.backgroundColor = phase.color;
+                document.body.style.background = phase.bgColor;
+                
+                // 圆圈动画
+                breathCircle.style.transform = `scale(${phase.scale})`;
+                breathCircle.style.boxShadow = phase.boxShadow;
+                circleInner.style.transform = `scale(${phase.scale > 1 ? 0.9 : 1.1})`;
+                
+                // 添加脉动效果
+                if (phase.name === '吸气') {
+                    breathCircle.style.animation = 'pulse 4s infinite';
+                } else {
+                    breathCircle.style.animation = 'none';
+                }
+                
+                // 设置下一个阶段
+                interval = setTimeout(() => {
+                    currentPhase = (currentPhase + 1) % breathingPhases.length;
+                    breathePhase();
+                }, phase.duration);
+            }
+            
+            // 暂停
+            function pauseBreathing() {
+                isBreathing = false;
+                startBtn.disabled = false;
+                clearTimeout(interval);
+                
+                if (startTime) {
+                    elapsedTime += Date.now() - startTime;
+                    startTime = null;
+                    clearInterval(timerInterval);
+                }
+            }
+            
+            // 重置
+            function resetBreathing() {
+                pauseBreathing();
+                currentPhase = 0;
+                instruction.textContent = '准备';
+                breathCircle.style.transform = 'scale(1)';
+                circleInner.style.transform = 'scale(1)';
+                circleInner.style.backgroundColor = '#e8f4f8';
+                document.body.style.backgroundColor = '#f8f9fa';
+                
+                elapsedTime = 0;
+                timerEl.textContent = '00:00';
+            }
+            
+            // 事件监听
+            startBtn.addEventListener('click', startBreathing);
+            pauseBtn.addEventListener('click', pauseBreathing);
+            resetBtn.addEventListener('click', resetBreathing);
+            
+            // 初始化
+            resetBreathing();
+        });
+    </script>
+</body>
+</html>
