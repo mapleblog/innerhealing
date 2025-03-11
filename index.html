@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深呼吸 · 放松 · 治愈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0e6ff 0%, #e6eeff 50%, #e0f0ff 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background 2s;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .breathing-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        h1 {
+            font-weight: 300;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            color: #444;
+        }
+        
+        .subtitle {
+            font-weight: 300;
+            margin-bottom: 40px;
+            color: #666;
+        }
+        
+        .breath-circle {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.8);
+            margin: 0 auto 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 5px 25px rgba(150, 180, 255, 0.2), 0 0 40px rgba(150, 180, 255, 0.15);
+            transition: transform 4s ease-in-out, box-shadow 4s ease-in-out;
+            overflow: hidden;
+        }
+        
+        .breath-circle:before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(
+                circle at center,
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(230, 240, 255, 0.5) 60%,
+                rgba(210, 230, 255, 0) 70%
+            );
+            opacity: 0.4;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .circle-inner {
+            width: 60%;
+            height: 60%;
+            border-radius: 50%;
+            background-color: #e8f4f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(150, 180, 255, 0.25);
+            transition: transform 4s ease-in-out, background-color 4s ease-in-out;
+            position: relative;
+            z-index: 2;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(150, 180, 255, 0.5); }
+            70% { box-shadow: 0 0 0 20px rgba(150, 180, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(150, 180, 255, 0); }
+        }
+        
+        .instruction {
+            font-size: 24px;
+            font-weight: 300;
+            color: #444;
+            transition: opacity 0.5s;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background-color: #fff;
+            border: 1px solid #d8e0ff;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #555;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(150, 180, 255, 0.1);
+        }
+        
+        button:hover {
+            background-color: #f0f5ff;
+        }
+        
+        button.active {
+            background-color: #e0eaff;
+            color: #333;
+            border-color: #c8d8ff;
+        }
+        
+        .timer {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #888;
+            font-weight: 300;
+        }
+        
+        /* 背景音乐控制样式 */
+        .music-control {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(150, 180, 255, 0.15);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .music-control label {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .music-selector {
+            width: 100%;
+            max-width: 300px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid #d8e0ff;
+            background-color: white;
+            color: #555;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .music-selector:focus {
+            outline: none;
+            border-color: #b8c5ff;
+            box-shadow: 0 0 5px rgba(150, 180, 255, 0.2);
+        }
+        
+        .volume-control {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .volume-slider {
+            width: 200px;
+            height: 5px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #b8c5ff, #d8e0ff);
+            outline: none;
+            border-radius: 5px;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #b8c5ff;
+            cursor: pointer;
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #b8c5ff;
+            cursor: pointer;
+        }
+        
+        .volume-icon {
+            color: #888;
+            font-size: 18px;
+        }
+        
+        /* 每日一言样式 */
+        .daily-quote {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(150, 180, 255, 0.15);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            transition: all 0.5s;
+        }
+        
+        .quote-text {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.6;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .quote-author {
+            font-size: 14px;
+            color: #888;
+            font-style: italic;
+            text-align: right;
+        }
+        
+        footer {
+            margin-top: 40px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            padding: 0 20px 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .breath-circle {
+                width: 220px;
+                height: 220px;
+                margin-bottom: 30px;
+            }
+            
+            .instruction {
+                font-size: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 200px;
+                margin-bottom: 10px;
+            }
+            
+            .timer {
+                margin-top: 15px;
+                margin-bottom: 10px;
+            }
+            
+            .music-control {
+                margin-top: 20px;
+                padding: 12px;
+                gap: 10px;
+            }
+            
+            .volume-slider {
+                width: 150px;
+            }
+            
+            .daily-quote {
+                margin-top: 20px;
+                padding: 15px;
+            }
+            
+            footer {
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>深呼吸 · 放松 · 治愈</h1>
+        <p class="subtitle">放慢脚步，感受呼吸，净化心灵</p>
+        
+        <div class="breath-circle">
+            <div class="circle-inner">
+                <span class="instruction">准备</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="start-btn">开始</button>
+            <button id="pause-btn">暂停</button>
+            <button id="reset-btn">重置</button>
+        </div>
+        
+        <div class="timer">00:00</div>
+        
+        <!-- 背景音乐控制 -->
+        <div class="music-control">
+            <label for="music-selector">背景音乐</label>
+            <select id="music-selector" class="music-selector">
+                <option value="forest">森林声音</option>
+                <option value="rain">雨声</option>
+                <option value="waves">海浪声</option>
+                <option value="meditation">冥想音乐</option>
+                <option value="piano">钢琴轻音乐</option>
+            </select>
+            <div class="volume-control">
+                <span class="volume-icon">🔈</span>
+                <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="50">
+                <span class="volume-icon">🔊</span>
+            </div>
+            <audio id="background-music" loop></audio>
+        </div>
+        
+        <!-- 每日一言 -->
+        <div class="daily-quote">
+            <p class="quote-text" id="quote-text">加载中...</p>
+            <p class="quote-author" id="quote-author"></p>
+        </div>
+    </div>
+    
+    <footer>
+        设计：简约时尚风格 · 深呼吸放松治愈小站 · 2025
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const breathCircle = document.querySelector('.breath-circle');
+            const circleInner = document.querySelector('.circle-inner');
+            const instruction = document.querySelector('.instruction');
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const quoteText = document.getElementById('quote-text');
+            const quoteAuthor = document.getElementById('quote-author');
+            const musicSelector = document.getElementById('music-selector');
+            const volumeSlider = document.getElementById('volume-slider');
+            const backgroundMusic = document.getElementById('background-music');
+
+            const timerEl = document.querySelector('.timer');
+            
+            let isBreathing = false;
+            let currentPhase = 0;
+            let interval;
+            let startTime = null;
+            let elapsedTime = 0;
+            let timerInterval;
+            
+            // 呼吸配置
+            const breathingPhases = [
+                { name: '吸气', duration: 4000, color: '#e8f2fa', scale: 1.15, bgColor: 'linear-gradient(135deg, #f0e0ff 0%, #e0e8ff 50%, #d8ecff 100%)', boxShadow: '0 5px 35px rgba(150, 180, 255, 0.4), 0 0 50px rgba(150, 180, 255, 0.3)' },
+                { name: '屏息', duration: 4000, color: '#e0eefa', scale: 1.15, bgColor: 'linear-gradient(135deg, #efe4ff 0%, #e4ecff 50%, #dcefff 100%)', boxShadow: '0 5px 35px rgba(150, 180, 255, 0.35), 0 0 50px rgba(150, 180, 255, 0.25)' },
+                { name: '呼气', duration: 4000, color: '#d8eafa', scale: 1, bgColor: 'linear-gradient(135deg, #f4ebff 0%, #eaf1ff 50%, #e6f5ff 100%)', boxShadow: '0 5px 25px rgba(150, 180, 255, 0.25), 0 0 40px rgba(150, 180, 255, 0.2)' },
+                { name: '屏息', duration: 4000, color: '#e0eefa', scale: 1, bgColor: 'linear-gradient(135deg, #efe4ff 0%, #e4ecff 50%, #dcefff 100%)', boxShadow: '0 5px 25px rgba(150, 180, 255, 0.2), 0 0 40px rgba(150, 180, 255, 0.15)' }
+            ];
+            
+            // 每日一言名言列表
+            const quotes = [
+                { text: "呼吸是连接身体与心灵的桥梁，深呼吸是走向内心宁静的第一步。", author: "佚名" },
+                { text: "生活不是等待风暴过去，而是学会在雨中跳舞。", author: "佚名" },
+                { text: "内心的平静，源于与自己的和解。", author: "老子" },
+                { text: "如果你想要内心的平和，尝试着改变自己而不是他人。", author: "佛陀" },
+                { text: "放下是一种智慧，静心是一种境界。", author: "禅语" },
+                { text: "静坐常思己过，闲谈莫论人非。", author: "陈寿" },
+                { text: "心若简单，世界则简单。", author: "禅语" },
+                { text: "时时慎独，心扉自清。", author: "王阳明" },
+                { text: "心静自然凉，止念即菩提。", author: "禅语" },
+                { text: "无论何时，保持一颗平静的心，是通往幸福的必经之路。", author: "王阳明" },
+                { text: "学会和自己相处，是一生的必修课。", author: "佚名" },
+                { text: "不必等待特别的一天，每一天都可以变得特别。", author: "佚名" },
+                { text: "最好的关系，是懂得彼此的沉默。", author: "禅语" },
+                { text: "心中有阳光，脚下自然有力量。", author: "佚名" },
+                { text: "慢一点，再慢一点，给心灵一个栖息的空间。", author: "佚名" }
+            ];
+            
+            // 加载每日一言
+            function loadDailyQuote() {
+                // 获取一个随机名言
+                const randomIndex = Math.floor(Math.random() * quotes.length);
+                const quote = quotes[randomIndex];
+                
+                // 更新显示
+                quoteText.textContent = quote.text;
+                quoteAuthor.textContent = "—— " + quote.author;
+            }
+            
+            // 定时器函数
+            function updateTimer() {
+                if (!startTime) return;
+                
+                const currentTime = Date.now();
+                const totalSeconds = Math.floor((currentTime - startTime + elapsedTime) / 1000);
+                const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+                const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+                
+                timerEl.textContent = `${minutes}:${seconds}`;
+            }
+            
+            // 开始呼吸引导
+            function startBreathing() {
+                if (isBreathing) return;
+                
+                isBreathing = true;
+                startBtn.disabled = true;
+                
+                if (!startTime) {
+                    startTime = Date.now();
+                    timerInterval = setInterval(updateTimer, 1000);
+                }
+                
+                breathePhase();
+            }
+            
+            // 呼吸阶段
+            function breathePhase() {
+                if (!isBreathing) return;
+                
+                const phase = breathingPhases[currentPhase];
+                
+                // 更新指示和动画
+                instruction.textContent = phase.name;
+                circleInner.style.backgroundColor = phase.color;
+                document.body.style.background = phase.bgColor;
+                
+                // 圆圈动画
+                breathCircle.style.transform = `scale(${phase.scale})`;
+                breathCircle.style.boxShadow = phase.boxShadow;
+                circleInner.style.transform = `scale(${phase.scale > 1 ? 0.9 : 1.1})`;
+                
+                // 添加脉动效果
+                if (phase.name === '吸气') {
+                    breathCircle.style.animation = 'pulse 4s infinite';
+                } else {
+                    breathCircle.style.animation = 'none';
+                }
+                
+                // 设置下一个阶段
+                interval = setTimeout(() => {
+                    currentPhase = (currentPhase + 1) % breathingPhases.length;
+                    breathePhase();
+                }, phase.duration);
+            }
+            
+            // 暂停
+            function pauseBreathing() {
+                isBreathing = false;
+                startBtn.disabled = false;
+                clearTimeout(interval);
+                
+                if (startTime) {
+                    elapsedTime += Date.now() - startTime;
+                    startTime = null;
+                    clearInterval(timerInterval);
+                }
+            }
+            
+            // 重置
+            function resetBreathing() {
+                pauseBreathing();
+                currentPhase = 0;
+                instruction.textContent = '准备';
+                breathCircle.style.transform = 'scale(1)';
+                circleInner.style.transform = 'scale(1)';
+                circleInner.style.backgroundColor = '#e8f4f8';
+                document.body.style.backgroundColor = '#f8f9fa';
+                
+                elapsedTime = 0;
+                timerEl.textContent = '00:00';
+            }
+            
+            // 事件监听
+            startBtn.addEventListener('click', startBreathing);
+            pauseBtn.addEventListener('click', pauseBreathing);
+            resetBtn.addEventListener('click', resetBreathing);
+            
+            // 初始化
+            resetBreathing();
+            
+            // 增加用户交互后自动播放音乐
+            document.body.addEventListener('click', () => {
+                if (backgroundMusic.paused) {
+                    backgroundMusic.play().catch(e => console.log('播放失败', e));
+                }
+            }, { once: true });
+            
+            // 加载每日一言
+            loadDailyQuote();
+            
+            // 背景音乐设置
+            const musicUrls = {
+                forest: 'audio/forest_music.mp3',
+                rain: 'https://assets.mixkit.co/sfx/preview/mixkit-rain-and-thunder-storm-2390.mp3',
+                waves: 'https://assets.mixkit.co/sfx/preview/mixkit-sea-waves-on-stony-beach-1191.mp3',
+                meditation: 'https://assets.mixkit.co/sfx/preview/mixkit-peaceful-and-inspirational-background-115.mp3',
+                piano: 'https://assets.mixkit.co/sfx/preview/mixkit-soft-piano-hotel-bar-loop-494.mp3'
+            };
+            
+            // 设置初始音乐
+            backgroundMusic.src = musicUrls[musicSelector.value];
+            backgroundMusic.volume = volumeSlider.value / 100;
+            backgroundMusic.play().catch(e => {
+                console.log('自动播放被浏览器阻止，请用户交互后再播放');
+            });
+            
+            // 音乐选择事件
+            musicSelector.addEventListener('change', () => {
+                backgroundMusic.src = musicUrls[musicSelector.value];
+                backgroundMusic.play();
+            });
+            
+            // 音量控制事件
+            volumeSlider.addEventListener('input', () => {
+                backgroundMusic.volume = volumeSlider.value / 100;
+            });
+            
+            // 添加刷新名言的按钮
+            const quoteBox = document.querySelector('.daily-quote');
+            const refreshBtn = document.createElement('button');
+            refreshBtn.textContent = '换一句';
+            refreshBtn.style.marginTop = '15px';
+            refreshBtn.style.padding = '5px 15px';
+            refreshBtn.style.fontSize = '14px';
+            refreshBtn.addEventListener('click', loadDailyQuote);
+            quoteBox.appendChild(refreshBtn);
+        });
+    </script>
+</body>
+</html>
