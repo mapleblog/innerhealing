@@ -291,16 +291,37 @@ document.addEventListener('DOMContentLoaded', () => {
     backgroundMusic.volume = volumeSlider.value / 100;
     
     const playMusicBtn = document.getElementById('play-music-btn');
+    const pauseMusicBtn = document.getElementById('pause-music-btn');
     
     // 播放音乐按钮事件
     playMusicBtn.addEventListener('click', function(e) {
         // 创建波纹效果
+        createRippleEffect(this, e);
+        
+        // 播放音乐
+        backgroundMusic.play();
+        
+        // 创建音符动画
+        createMusicNotes(this);
+    });
+    
+    // 暂停音乐按钮事件
+    pauseMusicBtn.addEventListener('click', function(e) {
+        // 创建波纹效果
+        createRippleEffect(this, e);
+        
+        // 暂停音乐
+        backgroundMusic.pause();
+    });
+    
+    // 创建波纹效果函数
+    function createRippleEffect(button, e) {
         const ripple = document.createElement('span');
         ripple.classList.add('ripple');
-        this.appendChild(ripple);
+        button.appendChild(ripple);
         
         // 计算波纹位置
-        const rect = this.getBoundingClientRect();
+        const rect = button.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
@@ -309,18 +330,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ripple.style.left = x - ripple.offsetWidth / 2 + 'px';
         ripple.style.top = y - ripple.offsetHeight / 2 + 'px';
         
-        // 播放音乐 (无论当前状态如何)
-        backgroundMusic.currentTime = 0; // 从头开始播放
-        backgroundMusic.play();
-        
-        // 创建音符动画
-        createMusicNotes(this);
-        
         // 移除波纹效果
         setTimeout(() => {
             ripple.remove();
         }, 600);
-    });
+    }
     
     // 创建音符动画
     function createMusicNotes(button) {

@@ -234,23 +234,44 @@ button {
     box-shadow: 0 2px 5px rgba(150, 180, 255, 0.1);
 }
 
-/* 播放按钮样式和特效 */
-#play-music-btn {
+/* 音乐控制按钮样式和特效 */
+.music-buttons {
+    display: flex;
+    gap: 15px;
     margin-top: 10px;
+}
+
+#play-music-btn, #pause-music-btn {
     background-color: #e0eaff;
     color: #555;
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    padding: 10px 20px;
 }
 
-#play-music-btn:hover {
-    background-color: #d0daff;
+#play-music-btn {
+    background-color: #c8e6c9;
+}
+
+#pause-music-btn {
+    background-color: #ffccbc;
+}
+
+#play-music-btn:hover, #pause-music-btn:hover {
     box-shadow: 0 4px 8px rgba(150, 180, 255, 0.2);
     transform: translateY(-2px);
 }
 
-#play-music-btn:active {
+#play-music-btn:hover {
+    background-color: #a5d6a7;
+}
+
+#pause-music-btn:hover {
+    background-color: #ffab91;
+}
+
+#play-music-btn:active, #pause-music-btn:active {
     transform: scale(0.96);
     box-shadow: 0 1px 3px rgba(150, 180, 255, 0.3);
 }
